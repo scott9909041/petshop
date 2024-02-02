@@ -3,6 +3,8 @@ package org.pet.shop.controller;
 import org.pet.shop.model.Pet;
 import org.pet.shop.service.PetService;
 import org.pet.shop.vo.PetCreatePayload;
+import org.pet.shop.vo.PetDetail;
+import org.pet.shop.vo.PetUpdatePayload;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,16 +21,16 @@ public class PetController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Pet>> getPets() {
+    public ResponseEntity<List<PetDetail>> getPets() {
         return petService.getPets();
     }
 
     @PostMapping("/query")
-    public ResponseEntity<List<Pet>> getPetsByName(@RequestBody Pet pet) {
+    public ResponseEntity<List<PetDetail>> getPetsByName(@RequestBody Pet pet) {
         return petService.getPetsByName(pet.getName());
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Pet> getPetById(@PathVariable UUID id) throws Exception {
+    public ResponseEntity<PetDetail> getPetById(@PathVariable UUID id) throws Exception {
         return petService.getPetById(id);
     }
 
@@ -38,7 +40,7 @@ public class PetController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Pet> updatePet(@PathVariable UUID id, @RequestBody Pet newPet) {
+    public ResponseEntity<Pet> updatePet(@PathVariable UUID id, @RequestBody PetUpdatePayload newPet) {
         return petService.updatePet(id, newPet);
     }
 
