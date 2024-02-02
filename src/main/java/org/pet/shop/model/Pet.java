@@ -3,7 +3,9 @@ package org.pet.shop.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Parent;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,5 +45,7 @@ public class Pet {
                     { @JoinColumn(name = "customer_id", referencedColumnName = "id") })
     private Customer customer;
 
+    @UpdateTimestamp
+    private Instant change_at;
 }
 
