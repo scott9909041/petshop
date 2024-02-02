@@ -2,6 +2,7 @@ package org.pet.shop.service;
 
 import org.pet.shop.model.Pet;
 import org.pet.shop.repo.PetRepo;
+import org.pet.shop.vo.PetCreatePayload;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -51,20 +52,34 @@ public class PetService {
         }
     }
 
-    public ResponseEntity<Pet> getPetById(UUID id) {
+    public ResponseEntity<Pet> getPetById(UUID id) throws Exception {
         Optional<Pet> petData = petRepo.findById(id);
 
-        if (petData.isPresent()) {
-            return new ResponseEntity<>(petData.get(), HttpStatus.OK);
-        }
+//        if (petData.isPresent()) {
+//            return new ResponseEntity<>(petData.get(), HttpStatus.OK);
+//        }
+//
+//        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+         Pet pet = petData.orElseThrow(() -> new Exception("No data found."));
+        return new ResponseEntity<>(pet, HttpStatus.OK);
+
     }
 
-    public ResponseEntity<Pet> createPet(Pet pet) {
-        Pet petObj = petRepo.save(pet);
+    public ResponseEntity<Pet> createPet(PetCreatePayload PetCreatePayload) {
+        Optional<Pet> fatherData = petRepo.findById(PetCreatePayload.getFather());
+        Pet father = fatherData.orElse(null);
+        Optional<Pet> motherData = petRepo.findById(PetCreatePayload.getMother());
+        Pet  mother =  motherData.orElse(null);
 
-        return new ResponseEntity<>(petObj, HttpStatus.OK);
+        Pet petObj = Pet.builder().name(PetCreatePayload.getName())
+                .type(PetCreatePayload.getType())
+                .color(PetCreatePayload.getColor())
+                .father(father)
+                .mother(mother)
+                .build();
+
+        return new ResponseEntity<>(petRepo.save(petObj), HttpStatus.OK);
     }
 
     public ResponseEntity<Pet> updatePet(UUID id, Pet newPet) {

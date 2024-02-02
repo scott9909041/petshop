@@ -2,6 +2,7 @@ package org.pet.shop.controller;
 
 import org.pet.shop.model.Pet;
 import org.pet.shop.service.PetService;
+import org.pet.shop.vo.PetCreatePayload;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,13 +28,13 @@ public class PetController {
         return petService.getPetsByName(pet.getName());
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Pet> getPetById(@PathVariable UUID id) {
+    public ResponseEntity<Pet> getPetById(@PathVariable UUID id) throws Exception {
         return petService.getPetById(id);
     }
 
     @PostMapping
-    public ResponseEntity<Pet> createPet(@RequestBody Pet Pet) {
-        return petService.createPet(Pet);
+    public ResponseEntity<Pet> createPet(@RequestBody PetCreatePayload PetCreatePayload) {
+        return petService.createPet(PetCreatePayload);
     }
 
     @PatchMapping("/{id}")
