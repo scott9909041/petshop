@@ -28,7 +28,7 @@ public class PetService {
             petRepo.findAll().forEach(pet -> petList.add(mappingPetDet(pet)));
 
             if (petList.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                return new ResponseEntity<>(petList, HttpStatus.NO_CONTENT);
             }
 
             return new ResponseEntity<>(petList, HttpStatus.OK);
@@ -44,7 +44,7 @@ public class PetService {
             petRepo.findAllByName(name).forEach(pet -> petList.add(mappingPetDet(pet)));
 
             if (petList.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                return new ResponseEntity<>(petList, HttpStatus.NO_CONTENT);
             }
 
             return new ResponseEntity<>(petList, HttpStatus.OK);
