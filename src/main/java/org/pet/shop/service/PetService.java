@@ -3,6 +3,8 @@ package org.pet.shop.service;
 import org.pet.shop.model.Pet;
 import org.pet.shop.repo.PetRepo;
 import org.pet.shop.vo.PetCreatePayload;
+import org.pet.shop.vo.PetDetail;
+import org.pet.shop.vo.PetUpdatePayload;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -14,16 +16,16 @@ import java.util.UUID;
 
 @Service
 public class PetService {
-    private final PetRepo petRepo;
+    private static PetRepo petRepo = null;
 
     public PetService(PetRepo petRepo) {
         this.petRepo = petRepo;
     }
 
-    public ResponseEntity<List<Pet>> getPets() {
+    public ResponseEntity<List<PetDetail>> getPets() {
         try {
-            List<Pet> petList = new ArrayList<>();
-            petRepo.findAll().forEach(petList::add);
+            List<PetDetail> petList = new ArrayList<>();
+            petRepo.findAll().forEach(pet -> petList.add(mappingPetDet(pet)));
 
             if (petList.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -35,12 +37,11 @@ public class PetService {
         }
     }
 
-
-    public ResponseEntity<List<Pet>> getPetsByName(String name) {
+    public ResponseEntity<List<PetDetail>> getPetsByName(String name) {
         try {
-            List<Pet> petList = new ArrayList<>();
+            List<PetDetail> petList = new ArrayList<>();
 
-            petRepo.findAllByName(name).forEach(petList::add);
+            petRepo.findAllByName(name).forEach(pet -> petList.add(mappingPetDet(pet)));
 
             if (petList.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -52,18 +53,11 @@ public class PetService {
         }
     }
 
-    public ResponseEntity<Pet> getPetById(UUID id) throws Exception {
+    public ResponseEntity<PetDetail> getPetById(UUID id) throws Exception {
         Optional<Pet> petData = petRepo.findById(id);
+        Pet pet = petData.orElseThrow(() -> new Exception("No data found."));
 
-//        if (petData.isPresent()) {
-//            return new ResponseEntity<>(petData.get(), HttpStatus.OK);
-//        }
-//
-//        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-         Pet pet = petData.orElseThrow(() -> new Exception("No data found."));
-        return new ResponseEntity<>(pet, HttpStatus.OK);
-
+        return new ResponseEntity<>(mappingPetDet(pet), HttpStatus.OK);
     }
 
     public ResponseEntity<Pet> createPet(PetCreatePayload PetCreatePayload) {
@@ -73,17 +67,16 @@ public class PetService {
         Pet  mother =  motherData.orElse(null);
 
         Pet petObj = Pet.builder().name(PetCreatePayload.getName())
-                .type(PetCreatePayload.getType())
-                .color(PetCreatePayload.getColor())
-                .father(father)
-                .mother(mother)
-                .build();
+            .type(PetCreatePayload.getType())
+            .color(PetCreatePayload.getColor())
+            .father(father)
+            .mother(mother)
+            .build();
 
         return new ResponseEntity<>(petRepo.save(petObj), HttpStatus.OK);
     }
 
-    public ResponseEntity<Pet> updatePet(UUID id, Pet newPet) {
-
+    public ResponseEntity<Pet> updatePet(UUID id, PetUpdatePayload newPet) {
         Optional<Pet> oldPetData = petRepo.findById(id);
 
         if (oldPetData.isPresent()) {
@@ -93,13 +86,12 @@ public class PetService {
 
             return new ResponseEntity<>(petObj, HttpStatus.OK);
         }
-
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-
-    private static Pet getPet(Pet newPet, Optional<Pet> oldPetData) {
+    private static Pet getPet(PetUpdatePayload newPet, Optional<Pet> oldPetData) {
         Pet updatePetData = oldPetData.get();
+
         String name = newPet.getName();
         if (name == null) {
             updatePetData.setName(updatePetData.getName());
@@ -121,11 +113,22 @@ public class PetService {
             updatePetData.setColor(color);
         }
 
-        Pet father = newPet.getFather();
-        if (color == null) {
-            updatePetData.setColor(updatePetData.getColor());
+        Optional<Pet> fatherData = petRepo.findById(newPet.getFather());
+        Pet father = fatherData.orElse(null);
+
+        if (father == null) {
+            updatePetData.setFather(null);
         } else {
-            updatePetData.setColor(color);
+            updatePetData.setFather(father);
+        }
+
+        Optional<Pet> motherData = petRepo.findById(newPet.getMother());
+        Pet mother = motherData.orElse(null);
+
+        if (mother == null) {
+            updatePetData.setMother(null);
+        } else {
+            updatePetData.setMother(mother);
         }
 
         return updatePetData;
@@ -136,4 +139,27 @@ public class PetService {
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    private PetDetail mappingPetDet(Pet pet) {
+        Pet father = pet.getFather();
+        Pet mother = pet.getMother();
+
+        PetDetail petDetail = PetDetail.builder()
+                .id(pet.getId())
+                .name(pet.getName())
+                .type(pet.getType())
+                .color(pet.getColor())
+                .build();
+        if (father != null) {
+            petDetail.setFatherId(father.getId());
+            petDetail.setFatherName(father.getName());
+        }
+
+        if (mother != null) {
+            petDetail.setMotherId(mother.getId());
+            petDetail.setMotherName(mother.getName());
+        }
+        return petDetail;
+    }
+
 }
