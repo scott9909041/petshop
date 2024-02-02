@@ -1,3 +1,6 @@
+build:
+  finalName: petshop-docker
+
 server:
   port: 9090
 

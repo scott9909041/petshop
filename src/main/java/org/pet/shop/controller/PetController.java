@@ -2,6 +2,7 @@ package org.pet.shop.controller;
 
 import org.pet.shop.model.Pet;
 import org.pet.shop.service.PetService;
+import org.pet.shop.vo.PetCreatePayload;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +18,6 @@ public class PetController {
         this.petService = petService;
     }
 
-    @GetMapping("/hello")
-    public String sayHello() {
-        return "Hello World";
-    }
-
     @GetMapping("")
     public ResponseEntity<List<Pet>> getPets() {
         return petService.getPets();
@@ -29,25 +25,16 @@ public class PetController {
 
     @PostMapping("/query")
     public ResponseEntity<List<Pet>> getPetsByName(@RequestBody Pet pet) {
-        System.out.println(pet.getName());
         return petService.getPetsByName(pet.getName());
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Pet> getPetById(@PathVariable UUID id) {
-        System.out.println(id);
+    public ResponseEntity<Pet> getPetById(@PathVariable UUID id) throws Exception {
         return petService.getPetById(id);
     }
 
-//    @GetMapping("/{id}")
-//    public ResponseEntity<Pet> getPetById(@PathVariable UUID id) {
-//        System.out.println(id);
-//        return petService.getPetById(id);
-//    }
-
     @PostMapping
-    public ResponseEntity<Pet> createPet(@RequestBody Pet Pet) {
-        System.out.println(Pet.toString());
-        return petService.createPet(Pet);
+    public ResponseEntity<Pet> createPet(@RequestBody PetCreatePayload PetCreatePayload) {
+        return petService.createPet(PetCreatePayload);
     }
 
     @PatchMapping("/{id}")
@@ -59,6 +46,5 @@ public class PetController {
     public ResponseEntity<Pet> deletePet(@PathVariable UUID id) {
         return petService.deletePet(id);
     }
-
 
 }

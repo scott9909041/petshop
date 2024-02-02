@@ -2,6 +2,7 @@ package org.pet.shop.service;
 
 import org.pet.shop.model.Pet;
 import org.pet.shop.repo.PetRepo;
+import org.pet.shop.vo.PetCreatePayload;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,6 @@ public class PetService {
 
     public ResponseEntity<List<Pet>> getPets() {
         try {
-//            Pet pet = Pet.builder().build();
-//            pet.getCustomer().getName();
-
             List<Pet> petList = new ArrayList<>();
             petRepo.findAll().forEach(petList::add);
 
@@ -41,13 +39,8 @@ public class PetService {
     public ResponseEntity<List<Pet>> getPetsByName(String name) {
         try {
             List<Pet> petList = new ArrayList<>();
-            System.out.println("In getPetsByName Service");
 
-            System.out.println(name);
             petRepo.findAllByName(name).forEach(petList::add);
-
-            System.out.println(petList);
-
 
             if (petList.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -59,48 +52,82 @@ public class PetService {
         }
     }
 
-    public ResponseEntity<Pet> getPetById(UUID id) {
+    public ResponseEntity<Pet> getPetById(UUID id) throws Exception {
         Optional<Pet> petData = petRepo.findById(id);
 
-        if (petData.isPresent()) {
-            return new ResponseEntity<>(petData.get(), HttpStatus.OK);
-        }
+//        if (petData.isPresent()) {
+//            return new ResponseEntity<>(petData.get(), HttpStatus.OK);
+//        }
+//
+//        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+         Pet pet = petData.orElseThrow(() -> new Exception("No data found."));
+        return new ResponseEntity<>(pet, HttpStatus.OK);
+
     }
 
-    public ResponseEntity<Pet> createPet(Pet pet) {
-        Pet userObj = petRepo.save(pet);
+    public ResponseEntity<Pet> createPet(PetCreatePayload PetCreatePayload) {
+        Optional<Pet> fatherData = petRepo.findById(PetCreatePayload.getFather());
+        Pet father = fatherData.orElse(null);
+        Optional<Pet> motherData = petRepo.findById(PetCreatePayload.getMother());
+        Pet  mother =  motherData.orElse(null);
 
-        return new ResponseEntity<>(userObj, HttpStatus.OK);
+        Pet petObj = Pet.builder().name(PetCreatePayload.getName())
+                .type(PetCreatePayload.getType())
+                .color(PetCreatePayload.getColor())
+                .father(father)
+                .mother(mother)
+                .build();
+
+        return new ResponseEntity<>(petRepo.save(petObj), HttpStatus.OK);
     }
 
     public ResponseEntity<Pet> updatePet(UUID id, Pet newPet) {
 
         Optional<Pet> oldPetData = petRepo.findById(id);
 
-        System.out.println(oldPetData);
-
         if (oldPetData.isPresent()) {
-            Pet updateUserData = getUser(newPet, oldPetData);
+            Pet updatePetData = getPet(newPet, oldPetData);
 
-            Pet userObj = petRepo.save(updateUserData);
+            Pet petObj = petRepo.save(updatePetData);
 
-            return new ResponseEntity<>(userObj, HttpStatus.OK);
+            return new ResponseEntity<>(petObj, HttpStatus.OK);
         }
 
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
 
-    private static Pet getUser(Pet newPet, Optional<Pet> oldPetData) {
+    private static Pet getPet(Pet newPet, Optional<Pet> oldPetData) {
         Pet updatePetData = oldPetData.get();
         String name = newPet.getName();
         if (name == null) {
             updatePetData.setName(updatePetData.getName());
         } else {
-            updatePetData.setName(newPet.getName());
+            updatePetData.setName(name);
         }
+
+        String type = newPet.getType();
+        if (type == null) {
+            updatePetData.setType(updatePetData.getType());
+        } else {
+            updatePetData.setType(type);
+        }
+
+        String color = newPet.getColor();
+        if (color == null) {
+            updatePetData.setColor(updatePetData.getColor());
+        } else {
+            updatePetData.setColor(color);
+        }
+
+        Pet father = newPet.getFather();
+        if (color == null) {
+            updatePetData.setColor(updatePetData.getColor());
+        } else {
+            updatePetData.setColor(color);
+        }
+
         return updatePetData;
     }
 
