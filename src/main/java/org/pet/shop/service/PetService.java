@@ -41,7 +41,7 @@ public class PetService {
         try {
             List<PetDetail> petList = new ArrayList<>();
 
-            petRepo.findAllByName(name).forEach(pet -> petList.add(mappingPetDet(pet)));
+            petRepo.findAllByNameLike("%"+name+"%").forEach(pet -> petList.add(mappingPetDet(pet)));
 
             if (petList.isEmpty()) {
                 return new ResponseEntity<>(petList, HttpStatus.OK);

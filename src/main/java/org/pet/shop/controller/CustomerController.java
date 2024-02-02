@@ -18,7 +18,6 @@ public class CustomerController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Customer> getCustomerById(@PathVariable UUID id) {
-        System.out.println(id);
         return customerService.getCustomerById(id);
     }
     @PostMapping
