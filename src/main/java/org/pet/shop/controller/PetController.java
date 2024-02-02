@@ -31,7 +31,7 @@ public class PetController {
         return petService.getPetsByName(pet.getName());
     }
     @GetMapping("/{id}")
-    public ResponseEntity<PetDetail> getPetById(@PathVariable UUID id) throws Exception {
+    public ResponseEntity<PetDetail> getPetById(@PathVariable UUID id) {
         return petService.getPetById(id);
     }
 

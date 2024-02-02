@@ -28,7 +28,7 @@ public class PetService {
             petRepo.findAll().forEach(pet -> petList.add(mappingPetDet(pet)));
 
             if (petList.isEmpty()) {
-                return new ResponseEntity<>(petList, HttpStatus.NO_CONTENT);
+                return new ResponseEntity<>(petList, HttpStatus.OK);
             }
 
             return new ResponseEntity<>(petList, HttpStatus.OK);
@@ -44,7 +44,7 @@ public class PetService {
             petRepo.findAllByName(name).forEach(pet -> petList.add(mappingPetDet(pet)));
 
             if (petList.isEmpty()) {
-                return new ResponseEntity<>(petList, HttpStatus.NO_CONTENT);
+                return new ResponseEntity<>(petList, HttpStatus.OK);
             }
 
             return new ResponseEntity<>(petList, HttpStatus.OK);
@@ -53,11 +53,14 @@ public class PetService {
         }
     }
 
-    public ResponseEntity<PetDetail> getPetById(UUID id) throws Exception {
+    public ResponseEntity<PetDetail> getPetById(UUID id) {
         Optional<Pet> petData = petRepo.findById(id);
-        Pet pet = petData.orElseThrow(() -> new Exception("No data found."));
+        Pet pet = petData.orElse(null);
 
-        return new ResponseEntity<>(mappingPetDet(pet), HttpStatus.OK);
+        if (pet != null) {
+            return new ResponseEntity<>(mappingPetDet(pet), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     public ResponseEntity<Pet> createPet(PetCreatePayload PetCreatePayload) {
